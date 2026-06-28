@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mes Défis – Ibrahima</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
+
+  :root {
+    --bg: #0f1117;
+    --card: #181c27;
+    --border: #252a38;
+    --text: #e8eaf0;
+    --muted: #6b7280;
+    --radius: 14px;
+
+    --c-sport: #f97316;
+    --c-coran: #4ade80;
+    --c-pmp: #818cf8;
+    --c-anglais: #22d3ee;
+    --c-lecture: #fb7185;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Space Grotesk', sans-serif;
+    min-height: 100vh;
+    padding: 24px 16px 60px;
+  }
+
+  header { text-align: center; margin-bottom: 28px; }
+
+  h1 { font-size: 24px; font-weight: 700; }
+  .subtitle {
+    color: var(--muted);
+    font-size: 13px;
+    margin-top: 6px;
+    font-family: 'DM Mono', monospace;
+  }
+
+  .week-nav {
+    display: flex; align-items: center; justify-content: space-between;
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 12px 16px; margin-bottom: 22px;
+  }
+  .week-nav button {
+    background: var(--border); border: none; color: var(--text);
+    width: 32px; height: 32px; border-radius: 8px; cursor: pointer;
+    font-size: 16px; display: flex; align-items: center; justify-content: center;
+  }
+  .week-label { font-weight: 600; font-size: 15px; }
+
+  /* Vue d'ensemble des défis */
+  .challenges-overview {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-bottom: 24px;
+  }
+
+  .challenge-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px;
+  }
+
+  .challenge-name {
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+  .challenge-count {
+    font-family: 'DM Mono', monospace;
+    font-size: 20px;
+    font-weight: 700;
+  }
+
+  .challenge-bar-bg {
+    height: 5px;
+    background: var(--border);
+    border-radius: 99px;
+    margin-top: 8px;
+    overflow: hidden;
+  }
+  .challenge-bar-fill { height: 100%; border-radius: 99px; transition: width 0.5s; }
+
+  /* Jours */
+  .days-grid { display: flex; flex-direction: column; gap: 10px; margin-bottom: 24px; }
+
+  .day-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+
+  .day-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 16px; cursor: pointer; user-select: none;
+  }
+
+  .day-name { font-weight: 600; font-size: 14px; display: flex; align-items: center; gap: 10px; }
+
+  .progress-pills {
+    display: flex; gap: 4px;
+  }
+  .pill {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--border);
+  }
+  .pill.active { opacity: 1; }
+  .pill.inactive { opacity: 0.25; }
+
+  .chevron { transition: transform 0.2s; color: var(--muted); font-size: 12px; }
+  .chevron.open { transform: rotate(180deg); }
+
+  .day-body { padding: 0 16px 16px; display: none; }
+  .day-body.open { display: block; }
+
+  .challenge-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .challenge-row:last-child { border-bottom: none; }
+
+  .challenge-row input[type="checkbox"] {
+    width: 20px; height: 20px;
+    cursor: pointer;
+    flex-shrink: 0;
+    accent-color: var(--accent-dyn, #f97316);
+  }
+
+  .challenge-label { flex: 1; }
+  .challenge-title { font-size: 13px; font-weight: 600; }
+  .challenge-target { font-size: 11px; color: var(--muted); font-family: 'DM Mono', monospace; margin-top: 1px; }
+
+  .rest-note {
+    font-size: 12px;
+    color: var(--muted);
+    padding: 10px 0;
+  }
+
+  /* Progression globale 90 jours */
+  .global-section {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px;
+    margin-bottom: 20px;
+  }
+
+  .section-title {
+    font-size: 12px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 2px; color: var(--muted); margin-bottom: 16px;
+  }
+
+  .global-row { margin-bottom: 16px; }
+  .global-row:last-child { margin-bottom: 0; }
+
+  .global-meta {
+    display: flex; justify-content: space-between;
+    font-size: 12px; margin-bottom: 6px;
+  }
+  .global-meta .name { display: flex; align-items: center; gap: 6px; color: var(--text); font-weight: 500; }
+  .global-meta .count { font-family: 'DM Mono', monospace; color: var(--muted); }
+
+  .bar-bg { height: 7px; background: var(--border); border-radius: 99px; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 99px; transition: width 0.6s ease; }
+
+  .btn-save {
+    width: 100%;
+    background: var(--text);
+    color: var(--bg);
+    border: none;
+    border-radius: var(--radius);
+    padding: 14px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .btn-save:active { transform: scale(0.98); }
+
+  .toast {
+    position: fixed; bottom: 24px; left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--c-coran); color: #0f1117;
+    font-weight: 700; font-size: 13px; padding: 10px 20px;
+    border-radius: 99px; opacity: 0;
+    transition: opacity 0.3s, transform 0.3s;
+    pointer-events: none; z-index: 100;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* Calendrier mensuel */
+  .calendar-section {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px;
+    margin-bottom: 20px;
+  }
+
+  .cal-nav {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 14px;
+  }
+  .cal-nav button {
+    background: var(--border); border: none; color: var(--text);
+    width: 30px; height: 30px; border-radius: 8px; cursor: pointer;
+    font-size: 15px; display: flex; align-items: center; justify-content: center;
+  }
+  .cal-month-label { font-weight: 700; font-size: 15px; text-transform: capitalize; }
+
+  .cal-weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+    margin-bottom: 6px;
+  }
+  .cal-weekdays span {
+    text-align: center;
+    font-size: 10px;
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+    text-transform: uppercase;
+  }
+
+  .cal-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+  }
+
+  .cal-day {
+    aspect-ratio: 1;
+    border-radius: 8px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    position: relative;
+    cursor: pointer;
+  }
+
+  .cal-day.empty { background: transparent; border: none; cursor: default; }
+  .cal-day.today { border-color: var(--text); border-width: 2px; }
+
+  .cal-day-num { font-family: 'DM Mono', monospace; font-weight: 600; }
+
+  .cal-dots {
+    display: flex;
+    gap: 2px;
+    margin-top: 2px;
+    height: 5px;
+  }
+  .cal-dots span {
+    width: 4px; height: 4px; border-radius: 50%;
+  }
+
+  .cal-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid var(--border);
+  }
+  .cal-legend-item {
+    display: flex; align-items: center; gap: 5px;
+    font-size: 11px; color: var(--muted);
+  }
+  .cal-legend-dot { width: 7px; height: 7px; border-radius: 50%; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Mes Défis 🎯</h1>
+  <p class="subtitle">90 jours · 5 disciplines</p>
+</header>
+
+<div class="week-nav">
+  <button onclick="changeWeek(-1)">‹</button>
+  <span class="week-label" id="week-label">Semaine 1</span>
+  <button onclick="changeWeek(1)">›</button>
+</div>
+
+<div class="challenges-overview" id="overview"></div>
+
+<div class="calendar-section">
+  <div class="cal-nav">
+    <button onclick="changeCalMonth(-1)">‹</button>
+    <span class="cal-month-label" id="cal-month-label"></span>
+    <button onclick="changeCalMonth(1)">›</button>
+  </div>
+  <div class="cal-weekdays">
+    <span>L</span><span>M</span><span>M</span><span>J</span><span>V</span><span>S</span><span>D</span>
+  </div>
+  <div class="cal-grid" id="cal-grid"></div>
+  <div class="cal-legend" id="cal-legend"></div>
+</div>
+
+<div class="days-grid" id="days-grid"></div>
+
+<div class="global-section">
+  <div class="section-title">Progression sur 90 jours</div>
+  <div id="global-progress"></div>
+</div>
+
+<button class="btn-save" onclick="saveData()">💾 Sauvegarder</button>
+
+<div class="toast" id="toast">✓ Sauvegardé !</div>
+
+<script>
+const JOURS = ['Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi','Dimanche'];
+
+const CHALLENGES = [
+  { id: 'coran',   label: 'Lecture du Coran', target: '1h minimum',          color: 'var(--c-coran)',   icon: '📖', days: [0,1,2,3,4,5,6], active: true },
+  { id: 'pmp',     label: 'Préparation PMP',  target: 'Session d\'étude · démarre en août', color: 'var(--c-pmp)',     icon: '📊', days: [0,1,2,3,4,5,6], active: false },
+  { id: 'anglais', label: 'Anglais',          target: '30 min · démarre en août',  color: 'var(--c-anglais)', icon: '🇬🇧', days: [0,1,2,3,4,5,6], active: false },
+  { id: 'lecture', label: 'Lecture',          target: '10 pages min · démarre en août', color: 'var(--c-lecture)', icon: '📚', days: [0,1,2,3,4,5,6], active: false },
+];
+
+const TOTAL_DAYS = 90;
+let currentWeek = 1;
+let data = {};
+
+// Date de référence : on suppose que la Semaine 1 commence un lundi donné.
+// Par défaut, on prend le lundi de la semaine actuelle comme ancre de la Semaine 1.
+function getAnchorMonday() {
+  let anchor = localStorage.getItem('anchor_monday');
+  if (!anchor) {
+    const today = new Date();
+    const day = today.getDay(); // 0=dimanche..6=samedi
+    const diffToMonday = day === 0 ? -6 : 1 - day;
+    const monday = new Date(today);
+    monday.setDate(today.getDate() + diffToMonday);
+    monday.setHours(0,0,0,0);
+    anchor = monday.toISOString();
+    localStorage.setItem('anchor_monday', anchor);
+  }
+  return new Date(anchor);
+}
+
+function dateToWeekAndDay(date) {
+  const anchor = getAnchorMonday();
+  const diffDays = Math.floor((date - anchor) / (1000*60*60*24));
+  const week = Math.floor(diffDays / 7) + 1;
+  let dayIndex = diffDays % 7;
+  if (dayIndex < 0) dayIndex += 7;
+  return { week, dayIndex };
+}
+
+let calViewDate = new Date(); // mois affiché dans le calendrier
+
+const MOIS_FR = ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
+
+function renderCalendar() {
+  const label = document.getElementById('cal-month-label');
+  label.textContent = `${MOIS_FR[calViewDate.getMonth()]} ${calViewDate.getFullYear()}`;
+
+  const grid = document.getElementById('cal-grid');
+  grid.innerHTML = '';
+
+  const year = calViewDate.getFullYear();
+  const month = calViewDate.getMonth();
+  const firstDay = new Date(year, month, 1);
+  const lastDay = new Date(year, month + 1, 0);
+
+  let startOffset = firstDay.getDay(); // 0=dimanche
+  startOffset = startOffset === 0 ? 6 : startOffset - 1; // décale pour commencer Lundi
+
+  for (let i = 0; i < startOffset; i++) {
+    const empty = document.createElement('div');
+    empty.className = 'cal-day empty';
+    grid.appendChild(empty);
+  }
+
+  const today = new Date();
+  const isSameDay = (a,b) => a.getFullYear()===b.getFullYear() && a.getMonth()===b.getMonth() && a.getDate()===b.getDate();
+
+  for (let d = 1; d <= lastDay.getDate(); d++) {
+    const date = new Date(year, month, d);
+    const { week, dayIndex } = dateToWeekAndDay(date);
+
+    const cell = document.createElement('div');
+    cell.className = 'cal-day' + (isSameDay(date, today) ? ' today' : '');
+
+    let dotsHTML = '';
+    if (week >= 1) {
+      const wd = JSON.parse(localStorage.getItem(weekKey(week)) || 'null');
+      const applicable = CHALLENGES.filter(c => c.days.includes(dayIndex));
+      dotsHTML = applicable.map(c => {
+        const done = wd && wd[dayIndex] && wd[dayIndex][c.id];
+        return `<span style="background:${done ? c.color : 'var(--border)'}"></span>`;
+      }).join('');
+    }
+
+    cell.innerHTML = `<span class="cal-day-num">${d}</span><div class="cal-dots">${dotsHTML}</div>`;
+    grid.appendChild(cell);
+  }
+
+  // Légende
+  const legend = document.getElementById('cal-legend');
+  legend.innerHTML = CHALLENGES.map(c => `
+    <div class="cal-legend-item">
+      <span class="cal-legend-dot" style="background:${c.color}"></span>
+      ${c.icon} ${c.label}
+    </div>
+  `).join('');
+}
+
+function changeCalMonth(dir) {
+  calViewDate.setMonth(calViewDate.getMonth() + dir);
+  renderCalendar();
+}
+
+function weekKey(w) { return `challenges_week_${w}`; }
+
+function loadWeek(w) {
+  const raw = localStorage.getItem(weekKey(w));
+  if (raw) return JSON.parse(raw);
+  const obj = {};
+  JOURS.forEach((j,i) => {
+    const entry = {};
+    CHALLENGES.forEach(c => entry[c.id] = false);
+    obj[i] = entry;
+  });
+  return obj;
+}
+
+function saveData() {
+  localStorage.setItem(weekKey(currentWeek), JSON.stringify(data));
+  const toast = document.getElementById('toast');
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 2200);
+  renderOverview();
+  renderGlobalProgress();
+  renderCalendar();
+}
+
+function toggleDay(i) {
+  document.getElementById(`body-${i}`).classList.toggle('open');
+  document.getElementById(`chev-${i}`).classList.toggle('open');
+}
+
+function toggleChallenge(day, id, val) {
+  data[day][id] = val;
+  renderOverview();
+  renderDayPills();
+}
+
+function renderOverview() {
+  const el = document.getElementById('overview');
+  el.innerHTML = CHALLENGES.map(c => {
+    const applicableDays = JOURS.filter((j,i) => c.days.includes(i));
+    const total = applicableDays.length;
+    const done = JOURS.filter((j,i) => c.days.includes(i) && data[i][c.id]).length;
+    const pct = total ? (done/total)*100 : 0;
+    return `
+      <div class="challenge-card">
+        <div class="challenge-name"><span class="dot" style="background:${c.color}"></span>${c.icon} ${c.label}</div>
+        <div class="challenge-count" style="color:${c.color}">${done}/${total}</div>
+        <div class="challenge-bar-bg"><div class="challenge-bar-fill" style="width:${pct}%;background:${c.color}"></div></div>
+      </div>
+    `;
+  }).join('');
+}
+
+function renderDayPills() {
+  JOURS.forEach((j,i) => {
+    const wrap = document.getElementById(`pills-${i}`);
+    if (!wrap) return;
+    wrap.innerHTML = CHALLENGES.filter(c => c.days.includes(i)).map(c => {
+      const active = data[i][c.id];
+      return `<span class="pill ${active ? 'active' : 'inactive'}" style="background:${c.color}"></span>`;
+    }).join('');
+  });
+}
+
+function renderDays() {
+  const grid = document.getElementById('days-grid');
+  grid.innerHTML = '';
+
+  JOURS.forEach((jour, i) => {
+    const applicable = CHALLENGES.filter(c => c.days.includes(i));
+
+    const card = document.createElement('div');
+    card.className = 'day-card';
+
+    card.innerHTML = `
+      <div class="day-header" onclick="toggleDay(${i})">
+        <div class="day-name">${jour}</div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div class="progress-pills" id="pills-${i}"></div>
+          <span class="chevron" id="chev-${i}">▼</span>
+        </div>
+      </div>
+      <div class="day-body" id="body-${i}">
+        ${applicable.map(c => `
+          <div class="challenge-row">
+            <input type="checkbox" id="chk-${i}-${c.id}" ${data[i][c.id] ? 'checked' : ''}
+              style="accent-color:${c.color}"
+              onchange="toggleChallenge(${i},'${c.id}',this.checked)">
+            <div class="challenge-label">
+              <div class="challenge-title">${c.icon} ${c.label}</div>
+              <div class="challenge-target">${c.target}</div>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+    grid.appendChild(card);
+  });
+
+  renderDayPills();
+}
+
+function renderGlobalProgress() {
+  // Compte les jours validés cumulés sur toutes les semaines sauvegardées dans localStorage
+  const el = document.getElementById('global-progress');
+  let html = '';
+
+  CHALLENGES.forEach(c => {
+    let totalDone = 0;
+    let totalApplicable = 0;
+
+    for (let w = 1; w <= 13; w++) { // ~13 semaines pour couvrir 90 jours
+      const raw = localStorage.getItem(weekKey(w));
+      if (!raw) continue;
+      const wd = JSON.parse(raw);
+      JOURS.forEach((j,i) => {
+        if (c.days.includes(i)) {
+          totalApplicable++;
+          if (wd[i] && wd[i][c.id]) totalDone++;
+        }
+      });
+    }
+
+    const pct = Math.min((totalDone / TOTAL_DAYS) * 100, 100);
+
+    html += `
+      <div class="global-row">
+        <div class="global-meta">
+          <span class="name">${c.icon} ${c.label}</span>
+          <span class="count">${totalDone} jours / ${TOTAL_DAYS}</span>
+        </div>
+        <div class="bar-bg"><div class="bar-fill" style="width:${pct}%;background:${c.color}"></div></div>
+      </div>
+    `;
+  });
+
+  el.innerHTML = html;
+}
+
+function changeWeek(dir) {
+  saveData();
+  currentWeek = Math.max(1, currentWeek + dir);
+  document.getElementById('week-label').textContent = `Semaine ${currentWeek}`;
+  data = loadWeek(currentWeek);
+  renderDays();
+  renderOverview();
+}
+
+// Init
+data = loadWeek(currentWeek);
+renderDays();
+renderOverview();
+renderGlobalProgress();
+renderCalendar();
+</script>
+</body>
+</html>
