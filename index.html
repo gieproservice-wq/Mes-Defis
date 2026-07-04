@@ -565,4 +565,71 @@ function renderDays() {
               onchange="toggleChallenge(${i},'${c.id}',this.checked)">
             <div class="challenge-label">
               <div class="challenge-title">${c.icon} ${c.label}</div>
-              <div cla
+              <div class="challenge-target">${c.target}</div>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+    grid.appendChild(card);
+  });
+
+  renderDayPills();
+}
+
+function renderGlobalProgress() {
+  // Compte les jours validés cumulés sur toutes les semaines sauvegardées dans localStorage
+  const el = document.getElementById('global-progress');
+  let html = '';
+
+  CHALLENGES.forEach(c => {
+    let totalDone = 0;
+    let totalApplicable = 0;
+
+    for (let w = 1; w <= 13; w++) { // ~13 semaines pour couvrir 90 jours
+      const raw = localStorage.getItem(weekKey(w));
+      if (!raw) continue;
+      const wd = JSON.parse(raw);
+      JOURS.forEach((j,i) => {
+        if (c.days.includes(i)) {
+          totalApplicable++;
+          if (wd[i] && wd[i][c.id]) totalDone++;
+        }
+      });
+    }
+
+    const pct = Math.min((totalDone / TOTAL_DAYS) * 100, 100);
+
+    html += `
+      <div class="global-row">
+        <div class="global-meta">
+          <span class="name">${c.icon} ${c.label}</span>
+          <span class="count">${totalDone} jours / ${TOTAL_DAYS}</span>
+        </div>
+        <div class="bar-bg"><div class="bar-fill" style="width:${pct}%;background:${c.color}"></div></div>
+      </div>
+    `;
+  });
+
+  el.innerHTML = html;
+}
+
+function changeWeek(dir) {
+  saveData();
+  currentWeek = Math.max(1, currentWeek + dir);
+  updateWeekLabel();
+  data = loadWeek(currentWeek);
+  renderDays();
+  renderOverview();
+}
+
+// Init
+data = loadWeek(currentWeek);
+updateWeekLabel();
+renderDays();
+renderOverview();
+renderGlobalProgress();
+renderCalendar();
+</script>
+</body>
+</html>
